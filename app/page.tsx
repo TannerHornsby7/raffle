@@ -60,7 +60,7 @@ export default function Home() {
                         <CampaignCard
                             key={campaign.id}
                             {...campaign}
-                            bgUrl={campaign.bgImageUrl}
+                            bgImageUrl={campaign.bgImageUrl}
                             bgVideoUrl={campaign.bgVideoUrl}
                             onAddToCart={() => {
                                 /* Implement cart functionality */
