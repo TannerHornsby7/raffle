@@ -23,8 +23,6 @@ export type Campaign = {
 export default function CampaignCard({
     id,
     bgImageUrl,
-    bgVideoUrl,
-    description,
     artistName,
     campaignName,
     ticketCost,

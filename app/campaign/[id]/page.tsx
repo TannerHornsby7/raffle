@@ -5,48 +5,19 @@ import { useParams } from 'next/navigation'
 import BackgroundVideo from '../../components/BackgroundVideo'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import type { Campaign } from '../../components/CampaignCard'
 
-// Mock data (replace with actual API call in a real application)
-const MOCK_ARTISTS = [
-    {
-        id: 1,
-        bgUrl: '/placeholder.svg',
-        videoUrl: 'https://example.com/taylor_swift_video.mp4',
-        artistName: 'Taylor Swift',
-        campaignName: 'Eras Tour VIP',
-        ticketCost: 99.99,
-        buyers: 1500,
-        isPopular: true,
-        isHot: true,
-        description:
-            "Get a chance to win VIP tickets to Taylor Swift's Eras Tour! This once-in-a-lifetime opportunity includes backstage access and a meet-and-greet with Taylor herself.",
-    },
-    {
-        id: 2,
-        bgUrl: '/placeholder.svg',
-        videoUrl: 'https://example.com/drake_video.mp4',
-        artistName: 'Drake',
-        campaignName: 'For All The Dogs',
-        ticketCost: 79.99,
-        buyers: 1200,
-        isPopular: true,
-        isHot: false,
-        description:
-            'Enter the raffle for a chance to attend Drake\'s exclusive album release party for "For All The Dogs". Winners will get to hear the album before anyone else and meet Drake in person!',
-    },
-    // Add more mock artists here
-]
+import Campaigns from '../../data/campaigns.json'
 
 export default function ArtistPage() {
     const params = useParams()
-    const [artist, setArtist] = useState<any>(null)
+    const [artist, setArtist] = useState<Campaign | null>(null)
     const [cartItems, setCartItems] = useState<number[]>([])
-    const [user, setUser] = useState(null) // Replace with actual auth logic
+    // const [user, setUser] = useState(null) // Replace with actual auth logic
 
     useEffect(() => {
-        // In a real app, you'd fetch the artist data from an API
         const artistId = Number(params.id)
-        const foundArtist = MOCK_ARTISTS.find((a) => a.id === artistId)
+        const foundArtist = Campaigns.find((a) => a.id === artistId)
         setArtist(foundArtist || null)
 
         // Fetch cart items (replace with actual logic in a real app)
@@ -70,7 +41,7 @@ export default function ArtistPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <BackgroundVideo src={artist.videoUrl} />
+            <BackgroundVideo src={artist.bgVideoUrl} />
             <main className="container mx-auto px-4 py-8 relative z-10">
                 <div className="max-w-2xl mx-auto bg-black bg-opacity-50 p-8 rounded-lg">
                     <h1 className="text-4xl font-bold mb-4">

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Cart() {
     const [cartItems, setCartItems] = useState<number[]>([])
-    const [user, setUser] = useState(null) // Replace with actual auth logic
+    // const [user, setUser] = useState(null) // Replace with actual auth logic
 
     useEffect(() => {
         // In a real app, you'd fetch the cart items from an API or local storage
