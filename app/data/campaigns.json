@@ -10,7 +10,9 @@
         "ticketCost": 79.99,
         "buyers": 1200,
         "isPopular": true,
-        "isHot": false
+        "isHot": false,
+        "bgColor": "#000000",
+        "foregroundColor": "#FFFFFF"
     },
     {
         "id": 2,
@@ -23,7 +25,9 @@
         "ticketCost": 99.99,
         "buyers": 1500,
         "isPopular": true,
-        "isHot": true
+        "isHot": true,
+        "bgColor": "#000000",
+        "foregroundColor": "#FFFFFF"
     },
     {
         "id": 3,
@@ -36,6 +40,8 @@
         "ticketCost": 129.99,
         "buyers": 2000,
         "isPopular": true,
-        "isHot": true
+        "isHot": true,
+        "bgColor": "#000000",
+        "foregroundColor": "#FFFFFF"
     }
 ]
