@@ -10,6 +10,7 @@ export type Campaign = {
     id: number
     bgImageUrl: string
     bgVideoUrl: string
+    bgVideoPath: string
     description: string
     artistName: string
     campaignName: string
