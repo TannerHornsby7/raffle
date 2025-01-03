@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import type { Campaign } from '@/app/components/CampaignCard'
@@ -20,110 +20,54 @@ export function CarouselSlide({
     direction,
     onRaffleClick,
 }: CarouselSlideProps) {
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-
-    useEffect(() => {
-        const vid = videoRef.current
-        if (!vid || !videoUrl) return
-
-        const handleCanPlay = () => {
-            setIsVideoLoaded(true)
-            if (isActive) {
-                const playPromise = vid.play()
-                if (playPromise) {
-                    playPromise.catch((err) => {
-                        console.warn('Video play failed:', err)
-                    })
-                }
-            }
-        }
-
-        vid.currentTime = 0
-        vid.load()
-
-        vid.addEventListener('canplay', handleCanPlay)
-        vid.addEventListener('loadeddata', handleCanPlay)
-
-        return () => {
-            vid.removeEventListener('canplay', handleCanPlay)
-            vid.removeEventListener('loadeddata', handleCanPlay)
-        }
-    }, [videoUrl, isActive])
-
-    // Handle active state changes
-    useEffect(() => {
-        const vid = videoRef.current
-        if (!vid) return
-
-        if (isActive) {
-            if (vid.readyState >= 3) {
-                const playPromise = vid.play()
-                if (playPromise) {
-                    playPromise.catch(console.warn)
-                }
-            }
-        } else {
-            vid.pause()
-            vid.currentTime = 0
-        }
-    }, [isActive])
-
-    const slideAnimation =
-        direction === null
-            ? ''
-            : direction === 'left'
-            ? 'animate-slide-from-right'
-            : 'animate-slide-from-left'
+    const [isGifLoaded, setIsGifLoaded] = useState(false)
 
     return (
         <div
-            className={`absolute inset-0 transition-transform duration-700
-                ${isActive ? 'z-10' : 'z-0 pointer-events-none'}
-                ${isActive ? slideAnimation : ''}`}
-        >
-            {/* Background Image */}
-            <div
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                    isVideoLoaded && isActive ? 'opacity-0' : 'opacity-100'
+            className={`absolute inset-0 transition-all ease-in-out duration-700
+                ${
+                    isActive
+                        ? 'opacity-100 z-10'
+                        : 'opacity-0 z-0 pointer-events-none'
                 }`}
-            >
-                <Image
-                    src={campaign.bgImageUrl}
-                    alt={campaign.campaignName}
-                    fill
-                    priority={isActive}
-                    className="object-cover brightness-50"
-                />
-            </div>
+        >
+            {/* Background Color */}
+            <div
+                className="absolute inset-0 transition-opacity duration-500"
+                style={{
+                    backgroundColor: campaign.bgColor,
+                    opacity: videoUrl && isGifLoaded ? 0 : 1,
+                }}
+            />
 
-            {/* Video Background */}
+            {/* GIF Background */}
             {videoUrl && (
                 <div
                     className={`absolute inset-0 transition-opacity duration-500 ${
-                        isVideoLoaded ? 'opacity-100' : 'opacity-0'
+                        isGifLoaded ? 'opacity-100' : 'opacity-0'
                     }`}
                 >
-                    <video
-                        ref={videoRef}
-                        muted
-                        loop
-                        playsInline
-                        preload="auto"
-                        className="absolute inset-0 w-full h-full object-cover brightness-50"
+                    <Image
                         src={videoUrl}
+                        alt={`${campaign.campaignName} animation`}
+                        fill
+                        priority={isActive}
+                        className="object-cover"
+                        onLoadingComplete={() => setIsGifLoaded(true)}
+                        unoptimized
                     />
                 </div>
             )}
 
             {/* Content Overlay */}
             <div
-                className={`absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16 text-white
-                    transition-all duration-700 transform ${
+                className={`absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16
+                    transition-all duration-700 ${
                         isActive
-                            ? 'translate-y-0 opacity-100 scale-100'
-                            : 'translate-y-8 opacity-0 scale-95'
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-4 opacity-0'
                     }`}
+                style={{ color: campaign.foregroundColor }}
             >
                 <h2 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
                     {campaign.artistName}

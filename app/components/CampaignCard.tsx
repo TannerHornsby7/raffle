@@ -9,16 +9,17 @@ import { Badge } from '@/components/ui/badge'
 export type Campaign = {
     id: number
     bgImageUrl: string
-    bgVideoUrl: string
     bgVideoPath: string
-    description: string
     artistName: string
     campaignName: string
+    description: string
     ticketCost: number
     buyers: number
     isPopular: boolean
     isHot: boolean
-    onAddToCart?: () => void
+    bgColor: string
+    foregroundColor: string
+    onAddToCart: () => void
 }
 
 export default function CampaignCard({

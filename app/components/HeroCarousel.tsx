@@ -12,14 +12,31 @@ import { getUrl } from 'aws-amplify/storage'
 
 Amplify.configure(outputs, { ssr: true })
 
-type HeroCarouselProps = {
-    campaigns: Campaign[]
+const CACHE_KEY = 'carousel-video-urls'
+const CACHE_EXPIRY = 1000 * 60 * 60 // 1 hour
+
+type CachedUrls = {
+    urls: Record<string, string>
+    timestamp: number
 }
 
-export default function HeroCarousel({ campaigns }: HeroCarouselProps) {
+function getCachedUrls(): Record<string, string> | null {
+    const cached = localStorage.getItem(CACHE_KEY)
+    if (!cached) return null
+
+    const { urls, timestamp }: CachedUrls = JSON.parse(cached)
+    if (Date.now() - timestamp > CACHE_EXPIRY) {
+        localStorage.removeItem(CACHE_KEY)
+        return null
+    }
+
+    return urls
+}
+
+export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [presignedUrls, setPresignedUrls] = useState<Record<string, string>>(
-        {}
+    const [videoUrls, setVideoUrls] = useState<Record<string, string>>(
+        () => getCachedUrls() || {}
     )
     const [slideDirection, setSlideDirection] = useState<
         'left' | 'right' | null
@@ -27,17 +44,46 @@ export default function HeroCarousel({ campaigns }: HeroCarouselProps) {
     const router = useRouter()
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Load all video URLs in parallel
+    // Load video URLs and cache them
     useEffect(() => {
         const loadVideos = async () => {
+            const cached = getCachedUrls()
+            if (cached) {
+                setVideoUrls(cached)
+                return
+            }
+
             const results = await Promise.all(
                 campaigns.map(async (campaign) => {
-                    const { bgVideoPath } = campaign
-                    const result = await getUrl({ path: bgVideoPath })
-                    return [bgVideoPath, result.url.toString()] as const
+                    try {
+                        const result = await getUrl({
+                            path: campaign.bgVideoPath,
+                        })
+                        return [
+                            campaign.bgVideoPath,
+                            result.url.toString(),
+                        ] as const
+                    } catch (error) {
+                        console.error(
+                            `Failed to load video for ${campaign.campaignName}:`,
+                            error
+                        )
+                        return [campaign.bgVideoPath, ''] as const
+                    }
                 })
             )
-            setPresignedUrls(Object.fromEntries(results))
+
+            const urls = Object.fromEntries(results)
+            setVideoUrls(urls)
+
+            // Cache the URLs
+            localStorage.setItem(
+                CACHE_KEY,
+                JSON.stringify({
+                    urls,
+                    timestamp: Date.now(),
+                })
+            )
         }
 
         loadVideos()
@@ -88,31 +134,15 @@ export default function HeroCarousel({ campaigns }: HeroCarouselProps) {
     useEffect(() => {
         const timer = setTimeout(() => {
             setSlideDirection(null)
-        }, 700) // Match animation duration
+        }, 700)
         return () => clearTimeout(timer)
     }, [currentIndex])
 
     const swipeHandlers = useSwipe(goToNext, goToPrevious)
 
-    // Preload next video
-    useEffect(() => {
-        const nextIndex = (currentIndex + 1) % campaigns.length
-        const nextCampaign = campaigns[nextIndex]
-        if (
-            nextCampaign?.bgVideoPath &&
-            presignedUrls[nextCampaign.bgVideoPath]
-        ) {
-            const video = document.createElement('video')
-            video.preload = 'auto'
-            video.src = presignedUrls[nextCampaign.bgVideoPath]
-            // Keep a reference to trigger loading
-            // const preloadVideo = video
-        }
-    }, [currentIndex, campaigns, presignedUrls])
-
     return (
         <div
-            className="relative h-[75vh] overflow-hidden rounded-2xl mx-4 my-6 shadow-2xl"
+            className="relative h-[75vh] overflow-hidden shadow-2xl"
             {...swipeHandlers}
             role="region"
             aria-label="Campaign carousel"
@@ -121,7 +151,7 @@ export default function HeroCarousel({ campaigns }: HeroCarouselProps) {
                 <CarouselSlide
                     key={campaign.id}
                     campaign={campaign}
-                    videoUrl={presignedUrls[campaign.bgVideoPath]}
+                    videoUrl={videoUrls[campaign.bgVideoPath]}
                     isActive={index === currentIndex}
                     direction={slideDirection}
                     onRaffleClick={() =>
