@@ -1,7 +1,4 @@
 'use client'
-
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-
 type CarouselControlsProps = {
     total: number
     current: number
@@ -13,8 +10,6 @@ type CarouselControlsProps = {
 export function CarouselControls({
     total,
     current,
-    onNext,
-    onPrevious,
     onDotClick,
 }: CarouselControlsProps) {
     return (
@@ -33,28 +28,6 @@ export function CarouselControls({
                         aria-label={`Slide ${index + 1}`}
                     />
                 ))}
-            </div>
-
-            {/* Arrows */}
-            <div className="hidden lg:block">
-                <button
-                    className="absolute top-1/2 left-6 -translate-y-1/2 bg-black/20 hover:bg-black/40 
-                        text-white/90 hover:text-white p-3 rounded-full backdrop-blur-sm 
-                        transition-all duration-300 transform hover:scale-105"
-                    onClick={onPrevious}
-                    aria-label="Previous slide"
-                >
-                    <ChevronLeft size={24} />
-                </button>
-                <button
-                    className="absolute top-1/2 right-6 -translate-y-1/2 bg-black/20 hover:bg-black/40 
-                        text-white/90 hover:text-white p-3 rounded-full backdrop-blur-sm 
-                        transition-all duration-300 transform hover:scale-105"
-                    onClick={onNext}
-                    aria-label="Next slide"
-                >
-                    <ChevronRight size={24} />
-                </button>
             </div>
         </>
     )

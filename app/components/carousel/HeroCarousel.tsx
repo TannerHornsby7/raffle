@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { CarouselSlide } from './carousel/CarouselSlide'
-import { CarouselControls } from './carousel/CarouselControls'
+import { CarouselSlide } from './CarouselSlide'
+import { CarouselControls } from './CarouselControls'
 import { useSwipe } from '@/app/hooks/useSwipe'
 import type { Campaign } from '@/app/components/CampaignCard'
 import outputs from '@/amplify_outputs.json'
@@ -12,47 +12,15 @@ import { getUrl } from 'aws-amplify/storage'
 
 Amplify.configure(outputs, { ssr: true })
 
-const CACHE_KEY = 'carousel-video-urls'
-const CACHE_EXPIRY = 1000 * 60 * 60 // 1 hour
-
-type CachedUrls = {
-    urls: Record<string, string>
-    timestamp: number
-}
-
-function getCachedUrls(): Record<string, string> | null {
-    const cached = localStorage.getItem(CACHE_KEY)
-    if (!cached) return null
-
-    const { urls, timestamp }: CachedUrls = JSON.parse(cached)
-    if (Date.now() - timestamp > CACHE_EXPIRY) {
-        localStorage.removeItem(CACHE_KEY)
-        return null
-    }
-
-    return urls
-}
-
 export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [videoUrls, setVideoUrls] = useState<Record<string, string>>(
-        () => getCachedUrls() || {}
-    )
-    const [slideDirection, setSlideDirection] = useState<
-        'left' | 'right' | null
-    >(null)
+    const [videoUrls, setVideoUrls] = useState<Record<string, string>>({})
     const router = useRouter()
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     // Load video URLs and cache them
     useEffect(() => {
         const loadVideos = async () => {
-            const cached = getCachedUrls()
-            if (cached) {
-                setVideoUrls(cached)
-                return
-            }
-
             const results = await Promise.all(
                 campaigns.map(async (campaign) => {
                     try {
@@ -75,15 +43,6 @@ export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
 
             const urls = Object.fromEntries(results)
             setVideoUrls(urls)
-
-            // Cache the URLs
-            localStorage.setItem(
-                CACHE_KEY,
-                JSON.stringify({
-                    urls,
-                    timestamp: Date.now(),
-                })
-            )
         }
 
         loadVideos()
@@ -109,15 +68,13 @@ export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
 
     const goToSlide = useCallback(
         (index: number) => {
-            setSlideDirection(index > currentIndex ? 'left' : 'right')
             setCurrentIndex(index)
             resetTimer()
         },
-        [currentIndex, resetTimer]
+        [resetTimer]
     )
 
     const goToPrevious = useCallback(() => {
-        setSlideDirection('right')
         setCurrentIndex(
             (prev) => (prev - 1 + campaigns.length) % campaigns.length
         )
@@ -125,18 +82,9 @@ export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
     }, [campaigns.length, resetTimer])
 
     const goToNext = useCallback(() => {
-        setSlideDirection('left')
         setCurrentIndex((prev) => (prev + 1) % campaigns.length)
         resetTimer()
     }, [campaigns.length, resetTimer])
-
-    // Reset slide direction after animation
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setSlideDirection(null)
-        }, 700)
-        return () => clearTimeout(timer)
-    }, [currentIndex])
 
     const swipeHandlers = useSwipe(goToNext, goToPrevious)
 
@@ -153,7 +101,6 @@ export default function HeroCarousel({ campaigns }: { campaigns: Campaign[] }) {
                     campaign={campaign}
                     videoUrl={videoUrls[campaign.bgVideoPath]}
                     isActive={index === currentIndex}
-                    direction={slideDirection}
                     onRaffleClick={() =>
                         router.push(`/campaign/${campaign.id}`)
                     }

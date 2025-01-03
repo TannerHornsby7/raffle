@@ -1,5 +1,5 @@
 'use client'
-import HeroCarousel from './components/HeroCarousel'
+import HeroCarousel from './components/carousel/HeroCarousel'
 import CampaignCard from './components/CampaignCard'
 import Campaigns from './data/campaigns.json'
 
@@ -15,7 +15,6 @@ export default function Home() {
                             key={campaign.id}
                             {...campaign}
                             bgImageUrl={campaign.bgImageUrl}
-                            bgVideoUrl={campaign.bgVideoUrl}
                             onAddToCart={() => {
                                 /* Implement cart functionality */
                             }}

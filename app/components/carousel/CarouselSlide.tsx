@@ -9,7 +9,6 @@ type CarouselSlideProps = {
     campaign: Campaign
     videoUrl?: string
     isActive: boolean
-    direction: 'left' | 'right' | null
     onRaffleClick: () => void
 }
 
@@ -52,7 +51,7 @@ export function CarouselSlide({
                         fill
                         priority={isActive}
                         className="object-cover"
-                        onLoadingComplete={() => setIsGifLoaded(true)}
+                        onLoad={() => setIsGifLoaded(true)}
                         unoptimized
                     />
                 </div>

@@ -19,7 +19,7 @@ export type Campaign = {
     isHot: boolean
     bgColor: string
     foregroundColor: string
-    onAddToCart: () => void
+    onAddToCart?: () => void
 }
 
 export default function CampaignCard({

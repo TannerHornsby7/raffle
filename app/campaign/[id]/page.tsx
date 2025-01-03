@@ -41,7 +41,7 @@ export default function ArtistPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <BackgroundVideo src={artist.bgVideoUrl} />
+            <BackgroundVideo src={artist.bgImageUrl} />
             <main className="container mx-auto px-4 py-8 relative z-10">
                 <div className="max-w-2xl mx-auto bg-black bg-opacity-50 p-8 rounded-lg">
                     <h1 className="text-4xl font-bold mb-4">
