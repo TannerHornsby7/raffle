@@ -17,7 +17,6 @@ export function CarouselSlide({
     campaign,
     videoUrl,
     isActive,
-    direction,
     onRaffleClick,
 }: CarouselSlideProps) {
     const [isGifLoaded, setIsGifLoaded] = useState(false)
